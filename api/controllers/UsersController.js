@@ -18,19 +18,24 @@
 module.exports = {
 
     userlist: function (req, res){
-        res.view('main/users');
+        res.view(200,'main/users');
     },
     
   getFriends : function (req, res) {
       var username = req.param('username'); // required parameters
       
       if(!username) {
-        res.send("Username Is Required");
+        return res.send(400,"Username Is Required");
       } else {
            
         Users.findOneByUsername(username).done( 
             function sendListOfFriends( err, u ) {
-                res.send(u.friendList);   
+                
+                if(!u){
+                    return res.send(404,"User Not Found");
+                }else{
+                    return res.send(200,u.friendList);
+                }
             }
         );
           
@@ -42,17 +47,17 @@ module.exports = {
       var username = req.param('username');
       var newfriend = req.param('newfriend');
       
-      if(!username){
-        res.send("Username Is Riquired");
-      }else if(!newfriend){
-        res.send("New Friend Is Riquired");
+      if(!username && !newfriend){
+        return res.send(400,"Username And New Friend Are Riquired");
+      } else if(!username) {
+        return res.send(400,"Username Is Riquired");
+      } else if(!newfriend){
+        return res.send(400,"New Friend Is Riquired");
       }else{
           
-      
-              Users.findOneByUsername(username).done( function (err, usr) {
-                    
+              Users.findOneByUsername(username).done( function (err, usr) {          
                   if(!usr){
-                    res.send("Username Not Found");
+                    return res.send(404, "Username Not Found");
                   }else{
                       var position = usr.friendList.length;
                       var haveThisFriend = false;
@@ -64,16 +69,16 @@ module.exports = {
                       }
 
                       if(haveThisFriend){ // User already has this friend
-                         res.send("User Already Has This Friend");
+                         return res.send(200,"User Already Has This Friend");
                       } else { 
                           usr.friendList[position] = newfriend; // add
                           usr.save(function (err) { //save changes made in the users
                             if (err) {
-                                res.send("Error Save");
+                                return res.send(500,"Error Save");
                             }
                           });
 
-                          res.send("OK");
+                          return res.send(200,"OK");
                       }
                   }
                 });
@@ -85,13 +90,13 @@ module.exports = {
         var username = req.param('username');
         
         if(!username){
-             res.send("Username Is Riquired");
+             return res.send(400,"Username Is Riquired");
         }else{
             Users.findOneByUsername(username).done( function (err, usr) {
                 if(!usr){
-                    res.send("User Not Found");
+                   return  res.send(404,"User Not Found");
                 }else{
-                    res.send(usr.status);
+                   return  res.send(200, usr.status);
                 }
             });
         }
@@ -102,26 +107,26 @@ module.exports = {
         var status = req.param('status');
         
         if(!username){
-            res.send("Username Is Riquired");
+            return res.send(400,"Username Is Riquired");
         }else if(!status){
-            res.send("Status Is Riquired");
+            return res.send(400,"Status Is Riquired");
         }else{
             Users.findOneByUsername(username).done(
                 function(err, usr){
                     if(!usr){
-                        res.send("User Not Found");
+                       return res.send(404,"User Not Found");
                     }else{
                         if(status == "online" || status == "offline"){
                             usr.status = status;
                             usr.save(function (err) { //save changes made in the users
                                 if (err) {
-                                    res.send("Error save");
+                                    return res.send(500,"Error save");
                                 }
                             }); 
                             
-                            res.send("OK");
+                            return res.send(200,"OK");
                         }else{
-                            res.send("Invalid Status");
+                            return  res.send(400,"Invalid Status");
                         }
                     }
                 }
