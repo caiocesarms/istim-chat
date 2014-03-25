@@ -21,5 +21,5 @@ A chat API that supply communication between Istim's users
 ### Saber se usuário está online
   - http://localhost:1337/getStatus?username=username
 
-### Alterar o estatus de um usuário
+### Alterar o status de um usuário
   - http://localhost:1337/setStatus?username=username&status=online

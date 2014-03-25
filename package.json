@@ -1,7 +1,7 @@
 {
     "name": "IstimChatAPI",
     "private": true,
-    "version": "0.0.0-1",
+    "version": "0.0.0-3",
     "description": "a Sails application",
     "dependencies": {
         "sails": "0.9.11",
@@ -21,7 +21,7 @@
     "repository": "",
     "author": "",
     "license": "",
-    "subdomain": "undefined-IstimChatAPI",
+    "subdomain": "istim-istimchatapi",
     "engines": {
         "node": "0.10.x"
     }
