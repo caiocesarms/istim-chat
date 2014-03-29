@@ -11,7 +11,8 @@
         "optimist": "0.3.4",
         "password-hash": "~1.2.1",
         "express": "*",
-        "socket.io": "*"
+        "socket.io": "*",
+        "request" : "*"
     },
     "scripts": {
         "start": "node app.js",

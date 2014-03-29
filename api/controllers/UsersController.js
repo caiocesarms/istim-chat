@@ -18,7 +18,7 @@
 module.exports = {
 
     userlist: function (req, res){
-        res.view(200,'main/users');
+        res.view('main/users');
     },
     
   getFriends : function (req, res) {
@@ -132,5 +132,40 @@ module.exports = {
                 }
             );
         }
-    } 
+    },
+    
+    
+    getAllUsers : function (req, res) {
+        
+        var request = require('request');
+        request('http://istim-user.nodejitsu.com/user', function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                res.send(200, JSON.parse(body));
+            } else {
+                res.send(404, 'recurso não encontrado');
+            }
+        });
+        
+        /* MANEIRA ANTIGA QUE ESTAVAMOS FAZENDO
+        var http = require('http');
+        
+        var response = 'nothing';
+        var url = 'http://istim-user.nodejitsu.com/user';
+        
+        http.get(url, function(res) {
+            var body = '';
+
+            res.on('data', function(chunk) {
+                body += chunk;
+            });
+            
+            res.on('end', function() {
+                response = JSON.parse(body);
+                console.log("Got response: ", response);
+            });
+        }).on('error', function(e) {
+            console.log("Got error: ", e);
+        });
+        console.log("Got response: ", response);*/
+    }
 };

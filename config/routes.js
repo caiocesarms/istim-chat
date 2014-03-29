@@ -47,7 +47,9 @@ module.exports.routes = {
     
     '/getStatus' : 'UsersController.getStatus',
     
-    '/setStatus' : 'UsersController.setStatus'
+    '/setStatus' : 'UsersController.setStatus',
+    
+    '/getAllUsers' : 'UserController.getAllUsers'
     
 
   /*
