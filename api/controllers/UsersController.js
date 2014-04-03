@@ -140,7 +140,14 @@ module.exports = {
         var request = require('request');
         request('http://istim-user.nodejitsu.com/user', function (error, response, body) {
             if (!error && response.statusCode == 200) {
-                res.send(200, JSON.parse(body));
+                
+                body = "{\"Users\":" + body + "}"; 
+                
+                var listUsers = JSON.parse(body);
+                
+                res.send(200, listUsers.Users[0]);
+                
+                //res.send(200, JSON.parse(body) );
             } else {
                 res.send(404, 'recurso não encontrado');
             }
