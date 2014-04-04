@@ -23,6 +23,7 @@ module.exports = {
             } else {
                 var hasher = require("password-hash");
                 password = hasher.generate(password);
+               
                 Users.create({ username: username, password: password }).done(function signupCreatUser(error, user) {
                     if (error) {
                         // Set the error header

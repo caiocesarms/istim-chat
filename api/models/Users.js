@@ -9,8 +9,11 @@
 module.exports = {
     attributes: {
 
-        
-        
+        /*username: {
+            type: 'string',
+            required: true,
+            unique: true
+        },*/
         username: {
             type: 'string',
             required: true,
@@ -29,13 +32,17 @@ module.exports = {
 
         friendList: {
             type: 'array',
+            defaultsTo: new Array()      
+        },
+        
+        requestFriendList: {
+            type: 'array',
             defaultsTo: new Array()
-            
         },
 
         getStatus: function() {
             return this.status;
-        },
+        }
     }
     
 };

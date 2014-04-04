@@ -17,6 +17,21 @@
 
 module.exports = {
 
+  create: function (req, res) {
+      
+      console.log("Entrou");
+      
+      var a = { username: "oiii", password: "foiii" };
+      
+      Users.create(a).done(function(err, ach) {
+          console.log("Foii");
+        return res.send(201, ach);
+      });
+      
+      return res.send("okokok");
+    
+  },
+    
     userlist: function (req, res){
         res.view('main/users');
     },
@@ -134,6 +149,38 @@ module.exports = {
         }
     },
     
+    /* synchronize local users with users in userserver */
+    updateUsers : function(req, res){
+        var request = require('request');
+        
+        request('http://istim-user.nodejitsu.com/user', function (error, response, body) {
+            if (!error && response.statusCode == 200) { 
+                
+                var listUsers = JSON.parse(body);
+                
+                for( var k = 0; k <  listUsers.length ; k++){
+                   var a = new Object();
+                   a.username = listUsers[k].email;
+                   a.password = listUsers[k].password;
+                   a.id = listUsers[k].id;
+                   
+                    Users.create(a).done(function(err, users){
+                        if (error) {
+                            // Set the error header
+                            res.set('error', 'DB Error');
+                            return res.send(500, { error: "DB Error" });
+                        }
+                    });
+                }
+                
+                return res.send(200, listUsers);
+                
+            } else {
+                return res.send(404, 'recurso não encontrado');
+            }
+        });
+    },
+    
     
     getAllUsers : function (req, res) {
         
@@ -145,11 +192,10 @@ module.exports = {
                 
                 var listUsers = JSON.parse(body);
                 
-                res.send(200, listUsers.Users[0]);
+                return res.send(200, listUsers);
                 
-                //res.send(200, JSON.parse(body) );
             } else {
-                res.send(404, 'recurso não encontrado');
+                return res.send(404, 'recurso não encontrado');
             }
         });
         
