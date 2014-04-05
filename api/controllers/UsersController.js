@@ -105,118 +105,122 @@ friendsRequest : function (req, res) {
 
     }
 },
+
+/* Return a current status of the user
+ * Username is required */
+getStatus : function (req, res) {
+    var username = req.param('username');
+
+    if(!username){
+         return res.send(400,"Username Is Riquired");
+    }else{
+        Users.findOneByUsername(username).done( function (err, usr) {
+            if(!usr){
+               return  res.send(404,"User Not Found");
+            }else{
+               return  res.send(200, usr.status);
+            }
+        });
+    }
+},
     
-    getStatus : function (req, res) {
-        var username = req.param('username');
-        
-        if(!username){
-             return res.send(400,"Username Is Riquired");
-        }else{
-            Users.findOneByUsername(username).done( function (err, usr) {
+/*Update status of the user
+ * A username is required and a avaliable status (online or offline)*/
+updateStatus : function (req, res) {
+    var username = req.param('username');
+    var status = req.param('status');
+
+    if(!username){
+        return res.send(400,"Username Is Riquired");
+    }else if(!status){
+        return res.send(400,"Status Is Riquired");
+    }else{
+        Users.findOneByUsername(username).done(
+            function(err, usr){
                 if(!usr){
-                   return  res.send(404,"User Not Found");
+                   return res.send(404,"User Not Found");
                 }else{
-                   return  res.send(200, usr.status);
-                }
-            });
-        }
-    },
-    
-    setStatus : function (req, res) {
-        var username = req.param('username');
-        var status = req.param('status');
-        
-        if(!username){
-            return res.send(400,"Username Is Riquired");
-        }else if(!status){
-            return res.send(400,"Status Is Riquired");
-        }else{
-            Users.findOneByUsername(username).done(
-                function(err, usr){
-                    if(!usr){
-                       return res.send(404,"User Not Found");
+                    if(status == "online" || status == "offline"){
+                        usr.status = status;
+                        usr.save(function (err) { //save changes made in the users
+                            if (err) {
+                                return res.send(500,"Error save");
+                            }
+                        }); 
+
+                        return res.send(200,"OK");
                     }else{
-                        if(status == "online" || status == "offline"){
-                            usr.status = status;
-                            usr.save(function (err) { //save changes made in the users
-                                if (err) {
-                                    return res.send(500,"Error save");
-                                }
-                            }); 
-                            
-                            return res.send(200,"OK");
-                        }else{
-                            return  res.send(400,"Invalid Status");
-                        }
+                        return  res.send(400,"Invalid Status");
                     }
                 }
-            );
+            }
+        );
+    }
+},
+    
+/* synchronize local users with users in userserver */
+updateUsers : function(req, res){
+    var request = require('request');
+
+    request('http://istim-user.nodejitsu.com/user', function (error, response, body) {
+        if (!error && response.statusCode == 200) { 
+
+            var listUsers = JSON.parse(body);
+
+            for( var k = 0; k <  listUsers.length ; k++){
+               var a = new Object();
+               a.username = listUsers[k].email;
+               a.password = listUsers[k].password;
+               a.id = listUsers[k].id;
+
+                Users.create(a).done(function(err, users){
+                    if (error) {
+                        // Set the error header
+                        res.set('error', 'DB Error');
+                        return res.send(500, { error: "DB Error" });
+                    }
+                });
+            }
+
+            return res.send(200, listUsers);
+
+        } else {
+            return res.send(404, 'recurso não encontrado');
         }
-    },
+    });
+},
     
-    /* synchronize local users with users in userserver */
-    updateUsers : function(req, res){
-        var request = require('request');
-        
-        request('http://istim-user.nodejitsu.com/user', function (error, response, body) {
-            if (!error && response.statusCode == 200) { 
-                
-                var listUsers = JSON.parse(body);
-                
-                for( var k = 0; k <  listUsers.length ; k++){
-                   var a = new Object();
-                   a.username = listUsers[k].email;
-                   a.password = listUsers[k].password;
-                   a.id = listUsers[k].id;
-                   
-                    Users.create(a).done(function(err, users){
-                        if (error) {
-                            // Set the error header
-                            res.set('error', 'DB Error');
-                            return res.send(500, { error: "DB Error" });
-                        }
-                    });
-                }
-                
-                return res.send(200, listUsers);
-                
-            } else {
-                return res.send(404, 'recurso não encontrado');
-            }
-        });
-    },
-    
-    
-    getAllUsers : function (req, res) {
-        
-        var request = require('request');
-        request('http://istim-user.nodejitsu.com/user', function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-                
-                body = "{\"Users\":" + body + "}"; 
-                
-                var listUsers = JSON.parse(body);
-                
-                return res.send(200, listUsers);
-                
-            } else {
-                return res.send(404, 'recurso não encontrado');
-            }
-        });
-        
+/* Get all users from de server of the users*/
+getAllUsers : function (req, res) {
+
+    var request = require('request');
+    request('http://istim-user.nodejitsu.com/user', function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+
+            body = "{\"Users\":" + body + "}"; 
+
+            var listUsers = JSON.parse(body);
+
+            return res.send(200, listUsers);
+
+        } else {
+            return res.send(404, 'recurso não encontrado');
+        }
+    });
+
         /* MANEIRA ANTIGA QUE ESTAVAMOS FAZENDO
         var http = require('http');
-        
+
         var response = 'nothing';
         var url = 'http://istim-user.nodejitsu.com/user';
-        
+
         http.get(url, function(res) {
             var body = '';
 
             res.on('data', function(chunk) {
                 body += chunk;
             });
-            
+
             res.on('end', function() {
                 response = JSON.parse(body);
                 console.log("Got response: ", response);
@@ -228,6 +232,9 @@ friendsRequest : function (req, res) {
     }
 };
 
+/* Useful functions are declared here*/
+
+/*Find a target in array, return true if found or false in other case*/
 function FindInArray(array, target){
     
     for(var i; i <  array.length; i++){
