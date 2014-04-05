@@ -35,7 +35,7 @@ module.exports = {
             defaultsTo: new Array()      
         },
         
-        requestFriendList: {
+        friendsRequest: {
             type: 'array',
             defaultsTo: new Array()
         },
