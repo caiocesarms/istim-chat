@@ -68,11 +68,11 @@ friendsRequest : function (req, res) {
   var newfriend = req.param('newfriend');
 
   if(!username && !newfriend){
-    return res.send(400,"Username And New Friend Are Riquired");
+    return res.send(400,"Username And New Friend Are Required");
   } else if(!username) {
-    return res.send(400,"Username Is Riquired");
+    return res.send(400,"Username Is Required");
   } else if(!newfriend){
-    return res.send(400,"New Friend Is Riquired");
+    return res.send(400,"New Friend Is Required");
   }else{
 
       Users.findOneByUsername(username).done( function (err, usr) {          
@@ -106,13 +106,113 @@ friendsRequest : function (req, res) {
     }
 },
 
+/*Return a user friend request list*/
+getFriendsRequest : function(req, res){
+    var username = req.param('username');
+    
+    if(!username){
+        return res.send(400,"Username Is Required");
+    }else{
+        Users.findOneByUsername(username).done( function (err, usr){
+            if(!usr){
+                return  res.send(404,"User Not Found");
+            }else{
+                return  res.send(404,usr.friendsRequest);
+            }
+        });
+    }
+    
+},
+
+/* Accept a request friend */
+acceptFriend : function(req, res){
+    var username = req.param('username');
+    var friendname = req.param('friendname');
+    
+    if(!username && !friendname){
+        return res.send(400,"Username and friend name are required");
+    }else if(!username){
+        return res.send(400,"Username is required");
+    }else if(!friendname){
+        return res.send(400,"Friend name is required");
+    }else{
+        
+        Users.findOneByUsername(username).done(function(err, usr){
+            
+            if(!usr){
+                return res.send(404,"Username not found");
+            }else{
+                var i = usr.friendsRequest.indexOf(friendname); // Find the request friend
+
+                if( i >= 0){ // if found
+                    usr.friendsRequest.splice(i,1); // remove of the friends request list
+
+                    usr.friendList.push(friendname); // add in the friend list of the username and ...
+                    
+                    usr.save(function (err) { //save changes made in the users
+                        if (err) {
+                            return res.send(500,"Error Save");
+                        }
+                    });
+
+                    Users.findOneByUsername(friendname).done(function(err, usr1){
+                        
+                        usr1.friendList.push(username); // ... add in the friend list of the friendname
+                        usr1.save(function (err) { //save changes made in the users
+                            if (err) {
+                                return res.send(500,"Error Save");
+                            }
+                        });
+                    });
+                    
+                    return res.send(200, "Successfull");
+                }else{
+                    return  res.send(404,"This request don'd exist");
+                }
+            }
+        });
+    
+    }
+    
+},
+  
+/* Update all models with a new atribute */
+updateModel : function(req, res){
+     Users.find().done(function(err, usr){
+        
+        var at = new Array();
+         
+        for(var i = 0; i < usr.length; i++){
+            at.push(usr[i]);
+            
+            usr[i].destroy(function(err){
+                if(!err){
+                    console.log("Data updated " + i);
+                }
+            });
+        }
+        
+        for(var i = 0; i < at.length; i++){
+            Users.create(at[i]).done(function(err, users){
+                if (err) {
+                    // Set the error header
+                    res.set('error', 'DB Error');
+                    return res.send(500, { error: "DB Error" });
+                }
+            });
+        }
+         
+        return res.send(200,"All models updated");
+    });
+},
+    
 /* Return a current status of the user
  * Username is required */
 getStatus : function (req, res) {
     var username = req.param('username');
 
     if(!username){
-         return res.send(400,"Username Is Riquired");
+         return res.send(400,"Username Is Required");
     }else{
         Users.findOneByUsername(username).done( function (err, usr) {
             if(!usr){
@@ -131,9 +231,9 @@ updateStatus : function (req, res) {
     var status = req.param('status');
 
     if(!username){
-        return res.send(400,"Username Is Riquired");
+        return res.send(400,"Username Is required");
     }else if(!status){
-        return res.send(400,"Status Is Riquired");
+        return res.send(400,"Status Is Required");
     }else{
         Users.findOneByUsername(username).done(
             function(err, usr){
@@ -243,4 +343,13 @@ function FindInArray(array, target){
         }
     }
     return false;
+}
+
+function FindPosition(array, target){
+     for(var i; i <  array.length; i++){
+        if(array[i] == target){
+            return i;
+        }
+    }
+    return -1;
 }

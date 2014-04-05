@@ -41,7 +41,7 @@ module.exports.routes = {
         action: 'userlist'
     },
     
-    '/getFriends' : 'UsersController.getFriends',
+   /* '/getFriends' : 'UsersController.getFriends',
     
     '/addFriend' : 'UsersController.addFriend',
     
@@ -49,11 +49,11 @@ module.exports.routes = {
     
     '/setStatus' : 'UsersController.setStatus',
     
-    '/getAllUsers' : 'UserController.getAllUsers',
+   // '/getAllUsers' : 'UserController.getAllUsers',
     
     '/create' : 'UserController.create',
     
-    '/updateUsers' : 'UserController.updateUsers'
+    '/updateUsers' : 'UserController.updateUsers'*/
     
 
   /*
